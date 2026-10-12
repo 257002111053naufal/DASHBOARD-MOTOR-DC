@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PulseLab · DC Motor Control</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand"><div class="brand-icon">P</div><div><b>PulseLab</b><small>CONTROL STUDIO</small></div></div>
+    <div class="nav-label">WORKSPACE</div>
+    <a class="nav active" href="#overview">◈ <span>Dashboard</span></a>
+    <a class="nav" href="#control">⌁ <span>Motor Control</span></a>
+    <a class="nav" href="#telemetry">▥ <span>Telemetry</span></a>
+    <a class="nav" href="#pid">⌘ <span>PID Tuning</span></a>
+    <div class="sidebar-bottom"><div class="device-dot"></div><div><b>Arduino Nano</b><small id="sideConnection">Belum terhubung</small></div></div>
+  </aside>
+  <main>
+    <header class="topbar"><div><div class="eyebrow">ENGINEERING / DC MOTOR</div><h1>Motor Control <span>Dashboard</span></h1></div>
+      <div class="top-actions"><span class="chip"><i id="statusDot"></i><span id="connectionLabel">Disconnected</span></span><button id="connectBtn" class="btn primary">↔ Hubungkan USB</button></div>
+    </header>
+    <section class="hero" id="overview"><div><div class="eyebrow light">LIVE CONTROL SYSTEM</div><h2>Precision in every<br><em>revolution.</em></h2><p>Monitoring dan kendali motor DC berbasis encoder secara real-time.</p><div class="hero-meta"><span>● SERIAL 115200 BAUD</span><span>● ENCODER FEEDBACK</span></div></div>
+      <div class="hero-art"><div class="orbit o1"></div><div class="orbit o2"></div><div class="motor-core">DC<br><small>MOTOR</small></div><div class="orbit-dot d1"></div><div class="orbit-dot d2"></div><div class="orbit-dot d3"></div></div>
+    </section>
+    <section class="metrics">
+      <article class="metric"><div class="metric-head">MODE AKTIF <span class="metric-icon pink">⌁</span></div><div class="metric-value" id="modeValue">0 <small>/ STOP</small></div><div class="metric-foot">Mode kontrol motor</div></article>
+      <article class="metric"><div class="metric-head">PWM OUTPUT <span class="metric-icon blue">ϟ</span></div><div class="metric-value"><span id="pwmValue">0</span><small> / 255</small></div><div class="meter"><span id="pwmBar"></span></div></article>
+      <article class="metric"><div class="metric-head">FEEDBACK TERUKUR <span class="metric-icon purple">↗</span></div><div class="metric-value"><span id="rpmValue">0.0</span><small> RPM</small></div><div class="metric-foot">Kecepatan aktual encoder</div></article>
+      <article class="metric"><div class="metric-head">POSISI SUDUT <span class="metric-icon blue">⊙</span></div><div class="metric-value"><span id="angleValue">0.0</span><small> °</small></div><div class="metric-foot">Sudut relatif dari origin</div></article>
+    </section>
+    <section class="main-grid">
+      <article class="panel control-panel" id="control"><div class="panel-title"><div><div class="eyebrow">COMMAND CENTER</div><h3>Kontrol Motor</h3></div><span class="live-tag">● LIVE READY</span></div>
+        <div class="mode-grid">
+          <button class="mode-card selected" data-mode="0"><b>00</b><span>STOP</span><small>Motor berhenti</small></button>
+          <button class="mode-card" data-mode="1"><b>01</b><span>OPEN LOOP</span><small>Kontrol PWM langsung</small></button>
+          <button class="mode-card" data-mode="2"><b>02</b><span>CLOSED LOOP RPM</span><small>Kontrol kecepatan PID</small></button>
+          <button class="mode-card" data-mode="3"><b>03</b><span>CLOSED LOOP POSISI</span><small>Kontrol sudut PID</small></button>
+        </div>
+        <div class="control-fields"><label id="targetLabel">TARGET PWM <span>(−255 sampai 255)</span></label><div class="input-row"><input id="targetInput" type="number" value="100" min="-255" max="255"><button id="sendTarget" class="btn primary">Kirim perintah ↗</button></div><input id="targetSlider" type="range" min="-255" max="255" value="100"><div class="range-labels"><span>−255</span><span id="sliderValue">100</span><span>255</span></div></div>
+        <div class="action-row"><button id="stopBtn" class="btn danger">■ Emergency Stop</button><button id="zeroBtn" class="btn secondary">◎ Set origin 0°</button></div>
+      </article>
+      <article class="panel telemetry-panel" id="telemetry"><div class="panel-title"><div><div class="eyebrow">SIGNAL MONITOR</div><h3>Grafik Telemetri</h3></div><select id="chartView"><option value="rpm">RPM · Target vs Aktual</option><option value="angle">Posisi · Target vs Aktual</option><option value="pwm">PWM Output</option></select></div>
+        <div class="chart-legend"><span><i class="legend-pink"></i> Target</span><span><i class="legend-blue"></i> Aktual / Output</span><small id="sampleCount">0 sampel</small></div><canvas id="chart" height="230"></canvas><div class="chart-footer"><span>WINDOW <b>60 DATA</b></span><span>UPDATE <b>20 ms*</b></span></div><p class="muted tiny">*Laju pembaruan mengikuti data serial yang diterima.</p>
+      </article>
+    </section>
+    <section class="main-grid lower-grid">
+      <article class="panel" id="pid"><div class="panel-title"><div><div class="eyebrow">PARAMETER OPTIMIZATION</div><h3>PID Tuning Pad</h3></div><span class="pill">LIVE PARAMETER</span></div>
+        <div class="pid-tabs"><button class="pid-tab active" data-pid="rpm">RPM Controller</button><button class="pid-tab" data-pid="pos">Position Controller</button></div>
+        <div class="pid-control"><div class="pid-label"><b>Kp</b><span id="kpVal">1.20</span></div><input id="kp" type="range" min="0" max="20" step=".05" value="1.2"></div>
+        <div class="pid-control"><div class="pid-label"><b>Ki</b><span id="kiVal">0.50</span></div><input id="ki" type="range" min="0" max="10" step=".05" value=".5"></div>
+        <div class="pid-control"><div class="pid-label"><b>Kd</b><span id="kdVal">0.01</span></div><input id="kd" type="range" min="0" max="2" step=".01" value=".01"></div>
+        <button id="applyPid" class="btn primary full">Terapkan parameter PID ↗</button><p class="muted tiny">Nilai awal mengikuti sketch Arduino. Pastikan tuning dilakukan dengan beban aman.</p>
+      </article>
+      <article class="panel analysis-panel"><div class="panel-title"><div><div class="eyebrow">STEP RESPONSE</div><h3>Analisis Transien PID</h3></div><span class="pill">ESTIMASI DARI DATA</span></div>
+        <div class="analysis-grid"><div class="analysis-item"><small>OVERSHOOT</small><b id="overshoot">—</b></div><div class="analysis-item"><small>SETTLING TIME</small><b id="settling">—</b></div><div class="analysis-item"><small>STEADY-STATE ERROR</small><b id="ssError">—</b></div><div class="analysis-item"><small>RISE TIME (10–90%)</small><b id="riseTime">—</b></div></div>
+        <div class="response-note" id="analysisNote">Pilih mode closed-loop dan kirim target untuk mulai mengumpulkan data respons.</div>
+        <div class="response-mini"><div class="response-line"></div><div class="response-caption"><span>SETPOINT</span><span>MEASURED RESPONSE</span></div></div>
+      </article>
+    </section>
+    <footer>PulseLab <span>·</span> DC Motor Control Suite <span class="footer-right">Arduino serial bridge · Web Serial API</span></footer>
+  </main>
+</div>
+<script src="app.js"></script>
+</body></html>
